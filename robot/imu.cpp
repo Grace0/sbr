@@ -1,16 +1,40 @@
 #include "imu.h"
-//#include "Arduino.h"
+#include "MPU6050_6Axis_MotionApps20.h" //this needs to be here as per github issue
 
-//TODO: wait 25 sec until values stabilize
-//MPU6050 mpu;
+volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
-/*
-void IMU::dmpDataReady() {
+// MPU control/status vars
+bool dmpReady = false;  // set true if DMP init was successful
+uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
+uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
+uint16_t fifoCount;     // count of all bytes currently in FIFO
+uint8_t fifoBuffer[64]; // FIFO storage buffer
+
+// orientation/motion vars
+Quaternion q;           // [w, x, y, z]         quaternion container
+VectorInt16 aa;         // [x, y, z]            accel sensor measurements
+VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
+VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
+VectorFloat gravity;    // [x, y, z]            gravity vector
+float euler[3];         // [psi, theta, phi]    Euler angle container
+float ypr[3];           // f[yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+
+float pitch;
+
+MPU6050 mpu;
+
+IMU::IMU() { //constructor doesn't have return type
+  
+}
+
+//the ISR to call when the interrupt occurs; this function must take no parameters and return nothing. This function is sometimes referred to as an interrupt service routine.
+void IMU::dmpDataReady() { //For example a processor doing a normal execution can be interrupted by some sensor to execute a particular process that is present in ISR (Interrupt Service Routine). After executing the ISR processor can again resume the normal execution.
   mpuInterrupt = true;
 }
 
 void IMU::initIMU() {
-  
+
   // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
@@ -36,7 +60,7 @@ void IMU::initIMU() {
   mpu.setXGyroOffset(220);
   mpu.setYGyroOffset(76);
   mpu.setZGyroOffset(-85);
-  mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
+  mpu.setZAccelOffset(1788); // 1688 factorgety default for my test chip
 
   // make sure it worked (returns 0 if so)
   if (devStatus == 0) {
@@ -46,8 +70,8 @@ void IMU::initIMU() {
 
     // enable Arduino interrupt detection
     Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
-    mpuIntStatus = mpu.getIntStatus();
+    attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING); //mode: defines when the interrupt should be triggered - RISING to trigger when the pin goes from low to high,
+    mpuIntStatus = mpu.getIntStatus(); //Interrupts is a mechanism by which an I/O or an instruction can suspend the normal execution of processor and gets itself serviced like it has higher priority
 
     // set our DMP Ready flag so the main loop() function knows it's okay to use it
     Serial.println(F("DMP ready! Waiting for first interrupt..."));
@@ -67,22 +91,14 @@ void IMU::initIMU() {
 
 }
 
-void IMU::getPitch() {
+float IMU::getPitch() {
   // if programming failed, don't try to do anything
   if (!dmpReady) return;
 
   // wait for MPU interrupt or extra packet(s) available
   while (!mpuInterrupt && fifoCount < packetSize) {
     // other program behavior stuff here
-    // .
-    // .
-    // .
-    // if you are really paranoid you can frequently test in between other
-    // stuff to see if mpuInterrupt is true, and if so, "break;" from the
-    // while() loop to immediately process the MPU data
-    // .
-    // .
-    // .
+
   }
 
   // reset interrupt flag and get INT_STATUS byte
@@ -123,4 +139,3 @@ void IMU::getPitch() {
     return pitch;
   }
 }
-*/
