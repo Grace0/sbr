@@ -4,10 +4,10 @@
 #include <AccelStepper.h>
 
 const int MOTOR_INTERFACE_TYPE = 1; //external stepper driver with Step and Direction pins
-const int LDIR_PIN = 4;
-const int LSTEP_PIN = 5;
-const int RDIR_PIN = 2;
-const int RSTEP_PIN = 3;
+const int LDIR_PIN = 6;
+const int LSTEP_PIN = 7;
+const int RDIR_PIN = 4;
+const int RSTEP_PIN = 5;
 
 
 class Drive {
@@ -22,19 +22,21 @@ class Drive {
     float getAngle();
     void setAngle(float imu_ang);
 
+    void setInitAngle(float _init_ang);
+
 
   private:
 
-    int _ldirPin, _lstepPin, _rdirPin, _rstepPin;
     float _now_time;
+    float init_ang;
 
-    const float MAX_SPEED = 0;
+    const float MAX_SPEED = 1000; //Speeds of more than 1000 steps per second are unreliable
     const float MAX_ACCEL = 0;
 
     const float Kp = 0;
     const float Ki = 0;
     const float Kd = 0;
-    const float Kf = 0;
+//    const float Kf = 0;
 
     float target_ang = 0;
     float now_ang = 0;
@@ -46,7 +48,7 @@ class Drive {
     float P = 0;
     float I = 0;
     float D = 0;
-    float F = 0;
+//    float F = 0;
 
     float error = 0;
     float error_integral = 0;

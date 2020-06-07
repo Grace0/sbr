@@ -60,7 +60,7 @@ void IMU::initIMU() {
   mpu.setXGyroOffset(220);
   mpu.setYGyroOffset(76);
   mpu.setZGyroOffset(-85);
-  mpu.setZAccelOffset(1788); // 1688 factorgety default for my test chip
+  mpu.setZAccelOffset(1788); 
 
   // make sure it worked (returns 0 if so)
   if (devStatus == 0) {

@@ -6,10 +6,10 @@ AccelStepper rstepper(MOTOR_INTERFACE_TYPE, RSTEP_PIN, RDIR_PIN);
 Drive::Drive() {
 
   lstepper.setMaxSpeed(MAX_SPEED);
-  lstepper.setAcceleration(MAX_ACCEL); // max or always?
+  //lstepper.setAcceleration(MAX_ACCEL); 
 
   rstepper.setMaxSpeed(MAX_SPEED);
-  rstepper.setAcceleration(MAX_ACCEL);
+  //rstepper.setAcceleration(MAX_ACCEL);
 
 }
 
@@ -21,13 +21,17 @@ float Drive::getAngle() {
   return now_ang;
 }
 
+void Drive::setInitAngle(float _init_ang) {
+  init_ang = _init_ang;
+}
+
 void Drive::runPID(float now_time) {
 
   _now_time = now_time;
   elapsed_time = (float)(_now_time - previous_time);
   previous_time = _now_time;
 
-  target_ang = 0; //always to balance
+  target_ang = init_ang; 
   now_ang = getAngle();
 
   now_error = target_ang - now_ang;
@@ -39,8 +43,6 @@ void Drive::runPID(float now_time) {
 
   error_derivative = (now_error - last_error) / elapsed_time;
   D = Kd * error_derivative;
-
-  F = Kf * error;
 
   output = P + I + D + F;
 
